@@ -79,12 +79,6 @@
 # include "mpi.h"
 # endif
 
-// NINO
-#include <iomanip>
-#include <array>
-#include <sstream>
-#include <stdio.h>
-
 #if defined (INTRASPECIFIC) || defined(DCELL)
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_randist.h>
@@ -96,6 +90,12 @@
 #include <gsl/gsl_linalg.h>
 #endif
 #endif
+
+// NINO
+#include <iomanip>
+#include <array>
+#include <sstream>
+#include <stdio.h>
 
 using namespace std;
 
@@ -1248,12 +1248,12 @@ void Tree::Birth(Species *S, int nume, int site0) {
 
 
 /*##############################################
- ####	            Tree birth              ####
+ ####	            Tree birth from Data    ####
  ####  called by BirthInit and UpdateTree   ####
  ##############################################*/
 
 
-void Tree::Birth(Species *S, int nume, int site0, float dbh_measured) {
+void Tree::BirthFromData(Species *S, int nume, int site0, float dbh_measured) {
     t_site = site0;
     t_sp_lab = nume;            /* t_sp_lab is the species label of a site. Can be defined even if the site is empty (cf. persistence function defined in Chave, Am Nat. 2001) */
     t_NPPneg=0.0;
@@ -1349,7 +1349,7 @@ void Tree::Birth(Species *S, int nume, int site0, float dbh_measured) {
     t_dbhmature=t_dbh_thresh*0.5; // this correponds to the mean thresholds of tree size to maturity, according to Visser et al. 2016 Functional Ecology (suited to both understory short-statured species, and top canopy large-statured species). NOTE that if we decide to keep it as a fixed species-specific value, this could be defined as a Species calss variable, and computed once in Species::Init. -- v230
 
 
-#ifdef(INTRASPECIFIC) // NINO
+#ifdef INTRASPECIFIC// NINO
     t_Tree_Height = minf(t_intraspecific_multiplier_height * t_hmax * t_dbh/(t_dbh + t_ah),HEIGHT-1); // todef NINO-OK
 #else
     t_Tree_Height = t_hmax * t_dbh/(t_dbh + t_ah);
@@ -1409,6 +1409,8 @@ else {t_Crown_Depth = de0+0.26*(t_Tree_Height-H0) - 0.09 * (5.0-H0);} /* allomet
         float crown_area_fl = maxf(0.0,PI * radius_layer * radius_layer);
         t_Crown_Volume += crown_area_fl * height_layer;
     }
+
+#endif
 
 
 
@@ -2521,7 +2523,7 @@ void Tree::FellTree() {
     }
     Death();
 }    
-  /* DOES IT HAVE TO BE UPDATED  
+  /* DOES IT HAVE TO BE UPDATED  */
 /*#####################################################
  ####      For Average and OutputField             ####
  ######################################################*/
@@ -3883,7 +3885,8 @@ void SelectiveLogging() {
 
 void Designate() {
 
-	int site, col, row, sp, sph=0, designated;
+	//int site, col, row, sp, sph=0, designated;
+	int site, sp, sph=0, designated;
 	float volume, dbh_min[numespharvestable], min_dbh_min, max_dbh_max=0.0;
 
 	/* getting species vector of minimum harvestable diameter */
@@ -3902,25 +3905,29 @@ void Designate() {
 			min_dbh_min = dbh_min[sph];
 
 	/* designating tree, increasing minimum harvestable dbh if needed to br under the objective */
-	for(min_dbh_min; min_dbh_min < max_dbh_max; min_dbh_min += 0.1){
+	//for(min_dbh_min; min_dbh_min < max_dbh_max; min_dbh_min += 0.1){
+	//for(mindiam = min_dbh_min; mindiam < max_dbh_max; mindiam += 0.1){
+	for(float increment = 0; increment < max_dbh_max - min_dbh_min; increment += 0.1){
 		volume=0.0;
 		designated=0;
 		for(site=0;site<sites;site++){
         	if(T[site].t_age > 0										/*alive tree*/
         		&& S[T[site].t_sp_lab].s_harvestable 					/*harvestable species*/
-        		&& T[site].t_dbh >= S[T[site].t_sp_lab].s_dbhmin		/*reached minimum dbh*/
+        		&& T[site].t_dbh >= S[T[site].t_sp_lab].s_dbhmin+increment		/*reached minimum dbh*/
+			  //&& T[site].t_dbh >= S[T[site].t_sp_lab].s_dbhmin
         		&& T[site].t_dbh <= S[T[site].t_sp_lab].s_dbhmax){		/*under maximum dbh*/
         		Tlogging[0][site] = 1;
         		volume += -0.0358 + 8.7634*T[site].t_dbh*T[site].t_dbh; /*volume by ONF-2011 in French Guiana - Center (Kourou)*/
         		designated++;
         	}
         }
-        if(volume < designated_volume)
+        //if(volume < designated_volume)
+        if(volume < designated_volume + 5 && volume > designated_volume - 5) // Nino
         	break;														/*if the volume is under the objective we can stop */
-        else
-        	for(sp=1;sp<=numesp;sp++)
-        		if(S[sp].s_harvestable)
-        			S[sp].s_dbhmin += 0.01;								/*if the volume is greater than the objective we need to derease minimum harvestable diameter for all species */
+        //else
+        	//for(sp=1;sp<=numesp;sp++)
+        		//if(S[sp].s_harvestable)
+        			//S[sp].s_dbhmin += 0.01;								/*if the volume is greater than the objective we need to derease minimum harvestable diameter for all species */
 	}
 
 	cout << designated << " trees have been designated, representing " << volume << " m3." << endl;
@@ -3930,7 +3937,8 @@ void Designate() {
 
 void Select() {
 	
-	int site, sp, i, rank, rankmax=0, unselected=0;
+	//int site, sp, i, rank, rankmax=0, unselected=0;
+	int site, sp, rank, rankmax=0, unselected=0;
 	float volume=0.0;
 
 	/* Calculating designated volume */
@@ -4918,8 +4926,8 @@ void OutputSnapshotFullFinal(fstream& output){ // To redefine here ? NINO
 }
 
 
-/* Basic BirthFromData: col, row, dbh_measured (in mm), species_label
-/* Tree attributes added: NPPneg, dbh_thresh, hmax, dbhmature, Tree_Height, Crown_Depth, Crown_Radius, ddbh, age, youngLA, matureLA, oldLA, leafarea, dens, litter, hurt
+// Basic BirthFromData: col, row, dbh_measured (in mm), species_label
+// Tree attributes added: NPPneg, dbh_thresh, hmax, dbhmature, Tree_Height, Crown_Depth, Crown_Radius, ddbh, age, youngLA, matureLA, oldLA, leafarea, dens, litter, hurt
 
 
 /* This provides relevant species parameters whenever called */
