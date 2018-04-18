@@ -2,7 +2,14 @@ void MainTracks() {
 
     int site, row, col, individuals=0;
     float volume=0.0;
-           
+    
+    // Find what is the row_num of the road edge
+    float row_num
+    float segment_volume;
+    while(segment_volume > harvested_volume){ // harvested volume or designated volume to be used ?
+        
+    }
+    
     for(row=0;row<(rows/2);row++){
         for(col=((cols/2)-3);col<((cols/2)+3);col++){
         	site = col+row*cols;
