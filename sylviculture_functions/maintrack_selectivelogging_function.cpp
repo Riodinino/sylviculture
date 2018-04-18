@@ -2,9 +2,23 @@ void MainTracks() {
 
     int site, row, col, individuals=0;
     float volume=0.0;
-           
-    for(row=0;row<(rows/2);row++){
-        for(col=((cols/2)-3);col<((cols/2)+3);col++){
+    
+    // Find what is the row_num of the road edge
+    float row_num
+    float segment_volume;
+    for(row=0;row<rows;row++){
+        // Calculate segment dimension
+        
+        // Extrapolate volume
+        
+        //
+    }
+    while(segment_volume > harvested_volume){ // harvested volume or designated volume to be used ?
+        
+    }
+    
+    for(row=0;row<row_num;row++){ // Track length
+        for(col=((cols/2)-3);col<((cols/2)+3);col++){ // Track width and position (central)
         	site = col+row*cols;
         	Tlogging[1][site] = 1;
         	if(T[site].t_age != 0) {
@@ -17,5 +31,3 @@ void MainTracks() {
     }    
     cout << individuals << " trees have been killed for the main track representing " << volume << " m3." << endl;
 }
-
-
