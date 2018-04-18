@@ -4,19 +4,28 @@ void MainTracks() {
     float volume=0.0;
     
     // Find what is the row_num of the road edge
-    float row_num
+    int row_num;
     float segment_volume;
-    
-    for(row=0;row<rows;row++){
+    float segment_area;
+
+    for(int row_n=0;row_n<rows;row_n++){
         // Calculate segment dimension
-        
+        segment_area = (row_n+1)*ncols; // in m²
+        segment_area /= 10000; 
         // Extrapolate volume
+        segment_volume = harvested_volume*segment_area;
+        //Compare it with harvestable volume
+
+        //if(segment_volume >97 && segment_volume < 103){ could be written like that but less permissive
+        if(segment_volume < 101){
+        	row_num = row_n;
+        	break;
+        }
         
-        //
     }
-    while(segment_volume > harvested_volume){ // harvested volume or designated volume to be used ?
+   // harvested volume or designated volume to be used ?
         
-    }
+   
     
     for(row=0;row<row_num;row++){ // Track length
         for(col=((cols/2)-3);col<((cols/2)+3);col++){ // Track width and position (central)
