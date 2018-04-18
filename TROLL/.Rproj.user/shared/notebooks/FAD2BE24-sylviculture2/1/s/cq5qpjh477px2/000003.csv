@@ -1,0 +1,8 @@
+"0","deq <- data.frame("
+"0","  time = resilience$time,"
+"0","  sim = resilience$sim,"
+"0","  structure = apply(resilience[c('agb', 'ba', 'n', 'n10', 'n30')], 1, "
+"0","                  function(x) sqrt(sum((rep(1, length(x)) - x)^2))),"
+"0","  production = apply(resilience[c('gpp', 'npp', 'Rday', 'Rnight')], 1, "
+"0","                  function(x) sqrt(sum((rep(1, length(x)) - x)^2)))"
+"0",")"

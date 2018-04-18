@@ -1,0 +1,13 @@
+"0","Ieq %>% "
+"0","  left_join(., doe, by = 'sim') %>% "
+"0","  filter(time == 600) %>%"
+"0","  select(Ieq.structure, ba, richness, FRic, FEve, FDiv, FDis) %>% "
+"0","  melt(id.vars = c('Ieq.structure', 'ba', 'richness')) %>% "
+"0","  ggplot(aes(x = Ieq.structure/ba, y = value)) + "
+"0","  geom_smooth(method = 'lm', alpha = 0.3, colour= 'grey') +"
+"0","  geom_point(aes(color = richness, size = ba/16)) +"
+"0","  facet_wrap(variable~, scales = ""free"", labeller = 'label_both') + "
+"2","Erreur : ',' inattendu(e) in:
+""  geom_point(aes(color = richness, size = ba/16)) +
+  facet_wrap(variable~,""
+"

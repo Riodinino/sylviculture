@@ -1,0 +1,35 @@
+
+MNT :Modele Numerique de Terrain
+********************************
+
+Zone : Paracou
+
+Precision : 5 m (taille du pixel)
+
+Surface emprise LIDAR : 1 270 ha
+
+Date vol : 04/2009
+
+Fournisseur : Entreprise Altoa
+
+Projection : WGS84 / UTM zone 22N
+
+
+
+
+Isolignes : Courbes de niveaux
+********************************
+
+zone : Paracou
+
+Donnéee crée à partir du MNT
+
+Surface emprise LIDAR : 1 270 ha
+
+Date vol : 04/2009
+
+Fournisseur : Entreprise Altoa
+
+Projection : WGS84 / UTM zone 22N
+
+
