@@ -2073,7 +2073,8 @@ void Tree::CalcRespGPP(){
         t_Rday=tempRday;
         tempRday=0.0;
         //if(t_site == 8771) cout << t_site << " | Height! " << t_Tree_Height << " ddbh: " << t_ddbh << " t_GPP: " << t_GPP << " Depth: " << t_Crown_Depth << " t_GPP: " << t_GPP << " t_Rday: " << t_Rday << " t_dens: "<< t_dens << endl;
-    } else {
+    } 
+    else {
         int crown_above_base = crown_base+1;
         int crown_above_top = crown_top+1;
         
@@ -2491,36 +2492,53 @@ void Tree::Couple(float &c_forceflex, float &angle) {
  ####################################*/
 
 
-void Tree::FellTree() {
+void Tree::FellTree(float angle) {
 
-	float t_angle = float(twoPi*genrand2()); // random angle
-	float h_true = t_Tree_Height*LV;
-    int xx, yy, row0, col0, r_int, h_int=int(h_true*NH);    
-
+    //float t_angle = float(twoPi*genrand2()); // random angle, not anymore inside
+    
+        /* treefall statistics */
+    nbTreefall1++; 
     if(t_dbh*LH>0.1) nbTreefall10++;
-    Thurt[0][t_site+sites] = int(t_Tree_Height); // Thurt[0] saves the integer tree height, here exactly at the place where the tree fell...
-    Tlogging[2][t_site] = 1;
-    row0=t_site/cols;       /* fallen stem destructs other trees */
+    if(t_dbh*LH>0.3) nbTreefall30++; //should we include them in the treefalls ?
+
+    int xx, yy;
+    int row0, col0, r_int, h_int;
+
+    float h_true = t_Tree_Height*LV;
+    h_int=int(h_true*NH); 
+    row0=t_site/cols;       
     col0=t_site%cols;
+
+
+    /* update of Thurt and Tlogging[2] fields at the site of the tree, for consistency */
+    Thurt[0][t_site+sites] = int(t_Tree_Height); // Thurt[0] saves the integer tree height, here exactly at the place where the tree fell...
+    // Tlogging[2] is used to represent gaps for gaps damages modelling
+    Tlogging[2][t_site] = 1;
+
+    /* fallen stem destructs other trees */
     for(int h=1;h<h_int;h++) { // loop on the fallen stem (horizontally)
-        xx=int(flor(col0+h*cos(t_angle))); // get projection in col (= xx) direction, where xx is absolute location
+        xx=int(flor(col0+h*cos(angle))); // get projection in col (= xx) direction, where xx is absolute location
         if(xx<cols){
-            yy=int(row0+h*sin(t_angle)); // get projection in row (= yy) direction, where yy is absolute location
-            Thurt[0][xx+(yy+rows)*cols] = int(t_Tree_Height); // Thurt[0] where the stem fell, calculation: xx+(yy+rows)*cols= xx + yy*cols + rows*cols = xx + yy*cols + sites
-            if(xx<cols && yy<rows) Tlogging[2][xx+yy*cols] = 1; // Tfell[0] is used to represent gaps for gaps damages modelling
+            yy=int(row0+h*sin(angle)); // get projection in row (= yy) direction, where yy is absolute location
+            /*NEW in v.2.4: addition of damage instead of setting equal in order to account for cumulative damage (several treefalls hitting the same site)*/
+            Thurt[0][xx+(yy+rows)*cols] += int(t_Tree_Height); // Thurt[0] where the stem fell, calculation: xx+(yy+rows)*cols= xx + yy*cols + rows*cols = xx + yy*cols + sites
+            if(xx<cols && yy<rows) Tlogging[2][xx+yy*cols] = 1; 
         }
     }
-    xx=col0+int((h_true*NH-t_Crown_Radius)*cos(t_angle)); // where crown ends/starts fallen crown destructs other trees */
-    yy=row0+int((h_true*NH-t_Crown_Radius)*sin(t_angle));
+
+    /* fallen crown destructs other trees, less damaging than stem */
+    xx=col0+int((h_true*NH-t_Crown_Radius)*cos(angle)); // where crown ends/starts fallen crown destructs other trees */
+    yy=row0+int((h_true*NH-t_Crown_Radius)*sin(angle));
     r_int = int(t_Crown_Radius);
     for(int col=max(0,xx-r_int);col<min(cols,xx+r_int+1);col++) { /* loop on the fallen crown (horizontally) */
         for(int row=yy-r_int;row<yy+r_int+1;row++) {
             if((col-xx)*(col-xx)+(row-yy)*(row-yy)<r_int*r_int) {
-            	Thurt[0][col+(row+rows)*cols] = int((t_Tree_Height-t_Crown_Radius*NV*LH)*0.5);
-            	if(xx<cols && yy<rows) Tlogging[2][xx+yy*cols] = 1;
+                Thurt[0][col+(row+rows)*cols] += int((t_Tree_Height-t_Crown_Radius*NV*LH)*0.5);
+                if(xx<cols && yy<rows) Tlogging[2][xx+yy*cols] = 1;
             }
         }
     }
+    // Outputs are in Death()
     Death();
 }    
   /* DOES IT HAVE TO BE UPDATED  */
