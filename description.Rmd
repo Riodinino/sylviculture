@@ -14,7 +14,11 @@ Here is a summary of the modifications and implementations I want to do from Syl
 
 1/ Creating a new option : the conventional-fashioned selective logging
 
+--> Do we keep the same designation process ? Cause planification is nrmally not part of what we call conventionnal logging.
+
 2/ Correcting and refining the existing procedures, especially the designation step
+
+--> Two options for the designation step : Taking into account the preferences
 
 3/ Making the code safe, generic, flexible to test a wider variety or situations
 
@@ -209,7 +213,7 @@ void Select() {
 
 # Rotten sub-module
 
-This submodule seems rather stable and relevant, we preferentially won't touch it, maybe only his place ino the code succession will change.
+This submodule seems rather stable and relevant, we preferentially won't touch it, maybe only his place ino the code succession will change, for example it could be placed before the selection step. 
 
 ```{rcpp}
 void Rot() {
@@ -402,6 +406,10 @@ void SecondaryTracks() {
 ```
 
 # Gap damages sub-module
+
+The gap damages submodule models the residual, additionnal mortality experimented by the stand after a logging event. It was modelled based on a disturbance index coined by Bruno Héraul and simplified by Sylvain Schmitt in thefirst version of the module, to express the mortality experienced by trees during 10 years aftera logging event. To model it in a feasible way, the probability foreach tree to die during this period is computed once and ten years after logging, from the logging damages map Tloging[2], that saves the horizontal position of the tree's crown and stem once felled during selctive logging.  The trees are thus killed at once with this computed probability, instead of making this mortality gradual as it is in reality. This can be a source of bias but implementing a new variable and add it to the mortality rate computation, and handling the decay of this variable in time, would be feasible thought complicated and time-consuming.
+A second source of bias is the model itself : It includes only the distance to the nearest logging gap, and does not take into account neither the other nearby gaps, nor their size. Moreover, only logging gaps aretaken into account in the computation, while other canopy openings such as the track are ignored. In reality, we can easily admit that tracks built during logging operations are likely to influence greatly the dynamics of the remaining stand, due to a modified incidence of light, wind, and due to potential erosion. 
+The simplicity of this modelling choice is that the distance to the nearest logging gap and the distance to the nearest logging track are rather correlated, since logging tracks are meant to lead to felled trees. Thus, using the logging gaps only as a proxy of the total forest disturbance, in order to explain tree mortality increment during thepost-logging period, is still a correct way to have an idea of the magnitude of logging damages. This model could be refined to be more accurate and take more types of gaps into account, and even differentiate the effect of each type. For reasons of timing and feasibility, we decided to stick with the actual version of this submodule for now.
 
 ```{rcpp}
 void GapDamages() {

@@ -1,5 +1,0 @@
-"0","BE <- BE %>%
-  filter(sim %in% paste0(unique(BEs$sim), '.', 0)) %>%
-  bind_rows(BEs, .)
-"
-"2","Unequal factor levels: coercing to character"

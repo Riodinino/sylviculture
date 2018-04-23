@@ -1,1 +1,0 @@
-{"frames":[],"message":"Erreur : ',' inattendu(e) in:\n\"  geom_point(aes(color = richness, size = ba/16)) +\n  facet_wrap(variable~,\"\n"}
