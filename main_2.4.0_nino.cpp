@@ -517,9 +517,12 @@ public:
 
 	    /* species logging parameters */
 	bool s_harvestable;		/*is the species in the list of harvestable species*/
+	
 	float s_dbhmin,			/*minimum harvestable diameter*/
 	s_dbhmax;				/*maximum harvestable diameter*/
-	int s_interest;				/*species interest to filter harvested trees in designated trees*/
+	
+	int s_interest,				/*species interest to filter harvested trees in designated trees*/
+	s_commercial_group; /* commercial group to which the species belong, independently of the inter
     
     
     Species() {
@@ -1000,6 +1003,9 @@ public:
     t_dens,                 /* tree crown average leaf density in m2/m2 -- v.2.2  */
     t_litter;               /* tree litterfall at each timestep, in g (of dry mass) -- v.2.2  */
     float *t_NDDfield;      /* _NDD */
+
+// New sylviculture module related parameter
+    bool t_harvestable; /* will the tree be effectively harvested */ 
  
 #ifdef INTRASPECIFIC
     /* new in v.2.4.0: lognormal variation within species, hence multipliers */
@@ -3480,10 +3486,13 @@ void Initialise() {
             output[34].open(nnn, ios::out);
             sprintf(nnn,"%s_%i_cica.txt",buf, easympi_rank);
             output[35].open(nnn, ios::out);
+
             // output[36] to register killed trees during a disturbance event
             if(_DISTURBANCE || _LOGGING){
-				sprintf(nnn,"%s_%i_disturbance.txt",buf, easympi_rank);
+				sprintf(nnn,"%s_%i_disturbance.txt",buf, easympi_rank); // Should be converted to Logging
             	output[36].open(nnn, ios::out);
+            	sprintf(nnn, "%s_%i_commercial_trees.txt", buf, easympi_rank);
+        		output[38].open(nnn, ios::out);
 
             }  // NINO
             if(_OUTPUT_fullFinal){
@@ -4004,7 +4013,7 @@ void Select() {
 void Rot() {
 
 	int site, rotten=0;
-	float protten, volume=0.0;
+	float protten, volume=0.0, volrot = 0.0, agbrot = 0.0; // New individual biomass and volume added to compute the biomass of rotten trees
 
 	/* Calculating selected volume */
 	for(site=0;site<sites;site++) 
@@ -4018,7 +4027,10 @@ void Rot() {
        		if(genrand2() < protten){
        			Tlogging[0][site]=0;
        			rotten++;
-           		volume -= -0.0358 + 8.7634*T[site].t_dbh*T[site].t_dbh; /*volume by ONF-2011 in French Guiana - Center (Kourou)*/
+       			volrot = -0.0358 + 8.7634*T[site].t_dbh*T[site].t_dbh;
+
+           		volume -= volrot; /*volume by ONF-2011 in French Guiana - Center (Kourou)*/
+           		output[36] << "R" << "\t" << T[site].t_harvestable << "\t" << t_s->s_commercial_group << "\t" << col << "\t" << row << "\t" << T[site].t_age << "\t" << T[site].t_dbh << "\t" << T[site].t_Tree_Height << "\t" << T[site].t_Crown_Radius << "\t" << T[site].t_Crown_Depth << "\t" << T[site].t_sp_lab << endl;
        		}
        	}
        } 
@@ -5244,3 +5256,4 @@ unsigned long genrand2i()
     
     return y;
 }
+
