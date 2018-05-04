@@ -87,7 +87,7 @@ void Designate() {
 
 		/* Apply a simple conservation rule to high-interest species */
 
-		/* Discard every species of absolute non-interest */
+		/* Discard every species of absolute non-interest || Should be done at random, or leave-one-in ? */
 		for(site=0;site<sites;site++){
         	if(T[site].t_age > 0										/*alive tree*/
         		&& S[T[site].t_sp_lab].s_harvestable 					/*harvestable species*/
